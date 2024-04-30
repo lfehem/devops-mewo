@@ -6,15 +6,6 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_data:/var/jenkins_home
-  
-  services:
-  web:
-    build: ./web
-    command: python manage.py runserver 0.0.0.0:8000
-    ports:
-     - "8000:8000"
-    volumes:
-     - ./web:/code
 
   sonarqube:
     image: sonarqube:lts
@@ -51,6 +42,19 @@ services:
       - postgresql_data:/var/lib/postgresql/data
       - ./tools/sonarqube/init-sonar-db.sql:/docker-entrypoint-initdb.d/init-sonar-db.sql
 
+  django:
+    build:
+      context: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./sources\realWorldApp-Conduit-Django:/app
+      
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    
+
   docs:
     build:
       context: .
@@ -58,6 +62,31 @@ services:
       - ./docs:/docs/docs:ro
     ports:
       - "8000:8000"
+
+  vue:
+    build:
+      context: .
+      dockerfile: Dockerfile.vue
+    command: npm run serve
+    volumes:
+      - ./sources/realWorldApp-Conduit-vue3:/app 
+    ports:
+      - "8081:8080"
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    command: npm run start
+    volumes:
+      - ./sources/realWorldApp-Conduit-vue3:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+
 
 volumes:
   jenkins_data:

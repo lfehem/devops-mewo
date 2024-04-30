@@ -6,6 +6,15 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_data:/var/jenkins_home
+  
+  services:
+  web:
+    build: ./web
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+     - "8000:8000"
+    volumes:
+     - ./web:/code
 
   sonarqube:
     image: sonarqube:lts
